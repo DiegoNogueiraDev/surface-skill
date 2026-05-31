@@ -1,0 +1,171 @@
+# surface — default output format policy
+# version 0.1.0
+#
+# Rules are evaluated top to bottom. First match wins.
+# Match syntax:
+#   exact string:   intent: code-review
+#   list of values: consumer: [human-once, human-archive]
+#   wildcard:       size: "*"
+# Omitted fields default to wildcard.
+
+version: 1
+
+rules:
+  - name: "Code review for humans → HTML"
+    match:
+      intent: code-review
+      consumer: [human-once, human-archive]
+    decide:
+      format: html
+      reason: "Diffs need color, anchoring, and inline annotations."
+
+  - name: "Dashboard for humans → HTML"
+    match:
+      intent: dashboard
+      consumer: [human-once, human-archive]
+    decide:
+      format: html
+      reason: "Dashboards are interfaces, not reports."
+
+  - name: "Mockup for humans → HTML+SVG"
+    match:
+      intent: mockup
+      consumer: [human-once, human-archive]
+    decide:
+      format: html+svg
+      reason: "Layouts are spatial. SVG is the right substrate."
+
+  - name: "Spec for next agent → hybrid"
+    match:
+      intent: spec
+      consumer: agent-next
+    decide:
+      format: hybrid-md-html
+      reason: "Next-step agents read MD well. HTML islands carry mockups and tables."
+
+  - name: "Large spec for humans → HTML"
+    match:
+      intent: spec
+      consumer: [human-once, human-archive]
+      size: large
+    decide:
+      format: html
+      reason: "Past 100 lines, MD specs become walls of text."
+
+  - name: "Spec for humans (normal size) → Markdown"
+    match:
+      intent: spec
+      consumer: [human-once, human-archive]
+      size: [small, medium]
+    decide:
+      format: markdown
+      reason: "Specs that fit on a screen scan fine as Markdown."
+
+  - name: "Large rich report → HTML"
+    match:
+      intent: report
+      consumer: [human-once, human-archive]
+      size: large
+      content: [tabular, visual, mixed]
+    decide:
+      format: html
+      reason: "Long reports with tables or visuals need real layout."
+
+  - name: "Large text report → Markdown"
+    match:
+      intent: report
+      consumer: [human-once, human-archive]
+      size: large
+      content: text-heavy
+    decide:
+      format: markdown
+      reason: "Long text reads better in MD than HTML overhead."
+
+  - name: "Normal report → Markdown"
+    match:
+      intent: report
+      consumer: [human-once, human-archive]
+      size: [small, medium]
+    decide:
+      format: markdown
+      reason: "Short reports don't justify HTML cost."
+
+  - name: "Data extraction → JSON"
+    match:
+      intent: data-extract
+    decide:
+      format: json
+      reason: "Structured data goes in structured containers."
+
+  - name: "RAG ingest → Markdown"
+    match:
+      consumer: rag-ingest
+    decide:
+      format: markdown
+      reason: "RAG chunking works best on clean MD. Token efficiency matters at re-embed scale."
+
+  - name: "Verifier reading visuals → HTML"
+    match:
+      consumer: agent-verify
+      content: [visual, interactive]
+    decide:
+      format: html
+      reason: "Verifier can render and inspect; visuals are first-class."
+
+  - name: "Verifier reading structure → JSON"
+    match:
+      consumer: agent-verify
+      content: [tabular, structured]
+    decide:
+      format: json
+      reason: "Structured comparison is cleaner with structured data."
+
+  - name: "Scratchpad → Markdown"
+    match:
+      intent: scratchpad
+    decide:
+      format: markdown
+      reason: "Ephemeral, conversational, low-fidelity. MD is the right tool."
+
+  - name: "Default fallback"
+    match: "*"
+    decide:
+      format: markdown
+      reason: "Conservative default: tokens cheap, portability high."
+
+# Canonical prompt prefixes per format.
+# These are internalized by the agent — not pasted into user-facing output.
+prompts:
+  markdown: |
+    Generate clean GitHub-flavored Markdown.
+    Use ATX headings (#, ##, ###).
+    Fenced code blocks with language tags.
+    Tables for tabular data.
+    No HTML tags unless explicitly required.
+    Prefer concise prose over walls of bullets.
+
+  html: |
+    Generate a single self-contained HTML5 document.
+    Inline <style> only — no external stylesheets, no external scripts.
+    Semantic tags: <table>, <details>, <figure>, <article>, <section>.
+    Inline <svg> for any vector graphic.
+    No JavaScript unless the consumer is interactive.
+    Optimize for one-shot rendering in a browser tab.
+
+  html+svg: |
+    Like html, but every visual element is inline <svg>.
+    Use viewBox for scaling.
+    Annotate with <title> and <desc> for accessibility.
+    Vector over raster, always.
+
+  json: |
+    Output a single JSON object.
+    No prose before or after. No markdown fences. No comments.
+    Top-level fields only — metadata, payload, version.
+
+  hybrid-md-html: |
+    Markdown as the primary surface.
+    Embed self-contained HTML blocks where information density demands it
+    (mockups, diagrams, comparison tables with styling).
+    Each HTML block must be valid in isolation.
+    Render correctly in MD viewers that support raw HTML (GitHub, Obsidian).

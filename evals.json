@@ -1,0 +1,48 @@
+{
+  "skill": "surface",
+  "note": "Canonical test cases derived from the worked examples in SKILL.md. Each case: a prompt, the expected matched rule, and the expected format. Walk policy.yaml top-to-bottom; first match wins.",
+  "cases": [
+    {
+      "id": "code-review-human",
+      "prompt": "Review this PR and tell me what's wrong with the streaming logic.",
+      "signals": { "intent": "code-review", "consumer": "human-once", "size": "medium", "content": "mixed" },
+      "expect": { "matchedRule": "Code review for humans → HTML", "format": "html" }
+    },
+    {
+      "id": "spec-agent-next",
+      "prompt": "Draft a PRD for our new payments service. The architect agent will pick this up next.",
+      "signals": { "intent": "spec", "consumer": "agent-next", "size": "large", "content": "mixed" },
+      "expect": { "matchedRule": "Spec for next agent → hybrid", "format": "hybrid-md-html" }
+    },
+    {
+      "id": "report-rag",
+      "prompt": "Summarize these 50 customer support tickets so we can feed them into our RAG store.",
+      "signals": { "intent": "report", "consumer": "rag-ingest", "size": "medium", "content": "text-heavy" },
+      "expect": { "matchedRule": "RAG ingest → Markdown", "format": "markdown" }
+    },
+    {
+      "id": "data-extract",
+      "prompt": "Extract the line items from this invoice.",
+      "signals": { "intent": "data-extract", "consumer": "agent-next", "content": "tabular" },
+      "expect": { "matchedRule": "Data extraction → JSON", "format": "json" }
+    },
+    {
+      "id": "mockup-visual",
+      "prompt": "Show me three layout options for the empty state of our new dashboard.",
+      "signals": { "intent": "mockup", "consumer": "human-once", "content": "visual" },
+      "expect": { "matchedRule": "Mockup for humans → HTML+SVG", "format": "html+svg" }
+    },
+    {
+      "id": "scratchpad",
+      "prompt": "Write a quick summary of our standup.",
+      "signals": { "intent": "scratchpad", "consumer": "human-once", "size": "small" },
+      "expect": { "matchedRule": "Scratchpad → Markdown", "format": "markdown" }
+    },
+    {
+      "id": "fallback",
+      "prompt": "Tell me a fun fact about octopuses.",
+      "signals": {},
+      "expect": { "matchedRule": "Default fallback", "format": "markdown" }
+    }
+  ]
+}
