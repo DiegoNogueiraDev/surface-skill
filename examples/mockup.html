@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Empty-state mockups — 3 options (surface example)</title>
+  <style>
+    body { font: 15px/1.5 system-ui, sans-serif; margin: 0; background: #f4f5f8; color: #1b1b2b; }
+    header { padding: 18px 24px; background: #11131f; color: #fff; }
+    header h1 { margin: 0 0 4px; font-size: 18px; }
+    header p { margin: 0; opacity: .7; font-size: 13px; }
+    .row { display: flex; flex-wrap: wrap; gap: 18px; padding: 24px; }
+    figure { flex: 1 1 260px; margin: 0; background: #fff; border-radius: 12px; padding: 14px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+    figcaption { font-size: 13px; color: #556; margin-top: 8px; }
+    svg { width: 100%; height: auto; display: block; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Dashboard empty state — three layout options</h1>
+    <p>intent=mockup · consumer=human-once · format=<strong>html+svg</strong> · matched rule: "Mockup for humans → HTML+SVG"</p>
+  </header>
+  <div class="row">
+    <figure>
+      <svg viewBox="0 0 240 160" xmlns="http://www.w3.org/2000/svg" role="img">
+        <title>Option A — centered illustration + CTA</title>
+        <desc>A single centered icon, headline, and one primary button.</desc>
+        <rect width="240" height="160" rx="8" fill="#fafbff" stroke="#dde"/>
+        <circle cx="120" cy="58" r="22" fill="#dfe6ff" stroke="#9fb0f0"/>
+        <rect x="80" y="92" width="80" height="8" rx="4" fill="#c9d2e6"/>
+        <rect x="92" y="108" width="56" height="6" rx="3" fill="#dde3ee"/>
+        <rect x="92" y="126" width="56" height="18" rx="9" fill="#3a5bd9"/>
+      </svg>
+      <figcaption><strong>A.</strong> Centered illustration + single CTA. Calmest; best when there's one obvious action.</figcaption>
+    </figure>
+    <figure>
+      <svg viewBox="0 0 240 160" xmlns="http://www.w3.org/2000/svg" role="img">
+        <title>Option B — checklist onboarding</title>
+        <desc>A left-aligned list of three setup steps with checkboxes.</desc>
+        <rect width="240" height="160" rx="8" fill="#fafbff" stroke="#dde"/>
+        <rect x="24" y="28" width="120" height="8" rx="4" fill="#c9d2e6"/>
+        <g fill="#9fb0f0">
+          <rect x="24" y="56" width="12" height="12" rx="3"/>
+          <rect x="24" y="84" width="12" height="12" rx="3"/>
+          <rect x="24" y="112" width="12" height="12" rx="3"/>
+        </g>
+        <g fill="#dde3ee">
+          <rect x="44" y="59" width="150" height="6" rx="3"/>
+          <rect x="44" y="87" width="170" height="6" rx="3"/>
+          <rect x="44" y="115" width="130" height="6" rx="3"/>
+        </g>
+      </svg>
+      <figcaption><strong>B.</strong> Checklist onboarding. Best when first value needs 2–3 setup steps.</figcaption>
+    </figure>
+    <figure>
+      <svg viewBox="0 0 240 160" xmlns="http://www.w3.org/2000/svg" role="img">
+        <title>Option C — sample data preview</title>
+        <desc>A faded sample chart behind a "load demo data" button.</desc>
+        <rect width="240" height="160" rx="8" fill="#fafbff" stroke="#dde"/>
+        <g opacity="0.35">
+          <rect x="28" y="96" width="20" height="40" fill="#9fb0f0"/>
+          <rect x="58" y="76" width="20" height="60" fill="#9fb0f0"/>
+          <rect x="88" y="56" width="20" height="80" fill="#9fb0f0"/>
+          <rect x="118" y="84" width="20" height="52" fill="#9fb0f0"/>
+        </g>
+        <rect x="150" y="64" width="70" height="22" rx="11" fill="#3a5bd9"/>
+        <rect x="160" y="71" width="50" height="8" rx="4" fill="#cdd8ff"/>
+      </svg>
+      <figcaption><strong>C.</strong> Sample-data preview. Best when the product only clicks once users see populated views.</figcaption>
+    </figure>
+  </div>
+</body>
+</html>

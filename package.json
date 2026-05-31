@@ -1,0 +1,16 @@
+{
+  "name": "surface-skill",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Output format policy for AI agents — decide HTML/Markdown/JSON/SVG/hybrid from signals.",
+  "license": "MIT",
+  "scripts": {
+    "test": "tsx scripts/run-evals.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4",
+    "js-yaml": "^4",
+    "@types/js-yaml": "^4"
+  }
+}

@@ -87,6 +87,23 @@ rules:
       reason: "Internal standard, decided 2026-Q2."
 ```
 
+## Evidence — run the evals
+
+The decision matrix isn't just asserted; it's executed. One command reproduces the proof:
+
+```bash
+npm install && npm test
+```
+
+`npm test` runs two parts:
+
+- **Part A — routing:** runs `decide()` over every case in [`evals.json`](./evals.json) and checks the chosen format (and matched rule) against the expectation. *7/7.*
+- **Part B — artifacts:** runs the validators in `validate.ts` over every file in [`examples/`](./examples) and checks each is well-formed for its format (HTML balanced, JSON parses, SVG scales, MD headings monotonic). *6/6.*
+
+It exits non-zero on any failure. To confirm the harness is real, flip one `expect.format` in `evals.json` and watch it fail.
+
+See the rendered output for each format in the gallery: [`examples/index.html`](./examples/index.html). The go/no-go for a public launch lives in [`LAUNCH.md`](./LAUNCH.md).
+
 ## Project layout
 
 ```
@@ -94,18 +111,22 @@ surface-skill/
 ├── SKILL.md          # Agent Skill instructions (canonical entry for skill consumers)
 ├── policy.yaml       # Decision rules (source of truth)
 ├── evals.json        # Canonical test cases (input → expected format)
+├── examples/         # One rendered artifact per format + index.html gallery
 ├── ITERATION-LOG.md  # Closed-validation diary
+├── LAUNCH.md         # Week-3 go/no-go checklist
+├── package.json      # `npm test` runs the evidence harness
 ├── README.md         # This file
 ├── LICENSE           # MIT
 └── scripts/
     ├── decide.ts     # Pure decision function (~80 lines)
     ├── validate.ts   # Per-format validators
-    └── prompts.ts    # Canonical prompt prefixes
+    ├── prompts.ts    # Canonical prompt prefixes
+    └── run-evals.ts  # Evidence harness (routing + artifact validation)
 ```
 
 ## Status
 
-**v0.1 — draft, in closed validation.** The Skill and the TypeScript functions work today. The skill is being exercised in real conversations before any public launch — see [`ITERATION-LOG.md`](./ITERATION-LOG.md).
+**v0.1 — draft, in closed validation.** The Skill, the TypeScript functions, and the evidence harness (`npm test`) work today. Routing and artifact checks are green; the skill is being exercised in real conversations before any public launch — see [`ITERATION-LOG.md`](./ITERATION-LOG.md) and [`LAUNCH.md`](./LAUNCH.md).
 
 ### Roadmap (not built yet)
 
