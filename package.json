@@ -8,7 +8,8 @@
   "scripts": {
     "test": "tsx scripts/run-evals.ts",
     "scenarios": "tsx scripts/run-scenarios.ts",
-    "shoot": "tsx scripts/shoot.ts"
+    "shoot": "tsx scripts/shoot.ts",
+    "sync:skill": "node scripts/sync-skill.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.60.0",
