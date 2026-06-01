@@ -1,6 +1,6 @@
 {
   "skill": "surface",
-  "note": "Canonical test cases derived from the worked examples in SKILL.md. Each case: a prompt, the expected matched rule, and the expected format. Walk policy.yaml top-to-bottom; first match wins.",
+  "note": "Canonical test cases. Each case: a prompt, the expected matched rule, and the expected format. Walk policy.yaml top-to-bottom; first match wins. Cases s-prefixed were promoted from the adversarial breadth review (ITERATION-LOG.md) to guard the v0.2 rule changes.",
   "cases": [
     {
       "id": "code-review-human",
@@ -30,7 +30,7 @@
       "id": "mockup-visual",
       "prompt": "Show me three layout options for the empty state of our new dashboard.",
       "signals": { "intent": "mockup", "consumer": "human-once", "content": "visual" },
-      "expect": { "matchedRule": "Mockup for humans → HTML+SVG", "format": "html+svg" }
+      "expect": { "matchedRule": "Mockup → HTML+SVG", "format": "html+svg" }
     },
     {
       "id": "scratchpad",
@@ -43,6 +43,36 @@
       "prompt": "Tell me a fun fact about octopuses.",
       "signals": {},
       "expect": { "matchedRule": "Default fallback", "format": "markdown" }
+    },
+    {
+      "id": "data-extract-human",
+      "prompt": "Extract the contract key terms and save them to our records.",
+      "signals": { "intent": "data-extract", "consumer": "human-archive", "content": "structured" },
+      "expect": { "matchedRule": "Data extraction for humans → Markdown", "format": "markdown" }
+    },
+    {
+      "id": "doc-runbook",
+      "prompt": "Write the on-call runbook for the payments service; we'll keep and update it.",
+      "signals": { "intent": "doc", "consumer": "human-archive", "size": "medium", "content": "mixed" },
+      "expect": { "matchedRule": "Rich doc for humans → hybrid", "format": "hybrid-md-html" }
+    },
+    {
+      "id": "rag-visual",
+      "prompt": "Prepare these architecture notes with diagrams for our RAG knowledge base.",
+      "signals": { "intent": "report", "consumer": "rag-ingest", "content": "visual" },
+      "expect": { "matchedRule": "RAG ingest with visuals → hybrid", "format": "hybrid-md-html" }
+    },
+    {
+      "id": "agent-handoff",
+      "prompt": "Review this PR and hand the findings to the auto-fix agent.",
+      "signals": { "intent": "code-review", "consumer": "agent-next", "content": "mixed" },
+      "expect": { "matchedRule": "Structured handoff to agents → JSON", "format": "json" }
+    },
+    {
+      "id": "mockup-agent",
+      "prompt": "Generate UI mockups for a vision agent to critique.",
+      "signals": { "intent": "mockup", "consumer": "agent-verify", "content": "visual" },
+      "expect": { "matchedRule": "Mockup → HTML+SVG", "format": "html+svg" }
     }
   ]
 }

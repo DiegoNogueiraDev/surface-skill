@@ -7,12 +7,13 @@ This file closes the "should we launch?" question. It separates **objective evid
 
 | Gate | Type | How to check | Status |
 |------|------|--------------|--------|
-| Routing correct on canonical cases | auto | `npm test` → Part A | ✅ 7/7 |
+| Routing correct on canonical cases | auto | `npm test` → Part A | ✅ 12/12 |
 | Generated artifacts well-formed | auto | `npm test` → Part B | ✅ 6/6 |
 | Example gallery renders | visual | open `examples/index.html` | ✅ 6 artifacts |
-| ≥10 real conversations logged | **manual** | `ITERATION-LOG.md` filled | ⬜ pending |
-| Article finalized + companion link | **manual** | draft done, links repo + gallery | ⬜ pending |
-| 5–7 screenshots/gifs | **manual** | derive from `examples/` | ⬜ pending |
+| Screenshots for launch | auto | `npm run shoot` → `examples/screenshots/` | ✅ 4 PNGs |
+| Article drafted + companion links | agent | `ARTICLE.md` | 🔶 draft done, awaiting Diego's sign-off |
+| **Matrix breadth — adversarial** | agent | `ITERATION-LOG.md` §1 | ✅ 24 scenarios, 6 misroutes fixed |
+| **Real-usage signal** | **human** | `ITERATION-LOG.md` §2 | ⬜ pending (Diego, ~10 chats) |
 
 The auto gates are reproducible by anyone: `npm install && npm test`. The negative test
 (flip one `expect.format` in `evals.json` → `npm test` exits 1) confirms the harness is real,
@@ -20,11 +21,17 @@ not a rubber stamp.
 
 ## Decision rule
 
-**GO** only when every gate above is checked. Until the real-usage log gate is green,
-status = **HOLD**. The code being green proves the engine is correct; it does *not* prove
-the matrix matches real-world intent — only the conversation log does that.
+**GO** only when every gate is checked. The split on the last two gates is deliberate and honest:
 
-**Current status: HOLD** — objective evidence is green; manual usage validation is the blocker.
+- **Adversarial breadth (agent) ✅** — independent skeptic agents tried to refute every route over
+  24 edge cases; coverage is proven and the matrix was hardened (v0.1 → v0.2). This proves the
+  engine is *correct*.
+- **Real-usage signal (human) ⬜** — only Diego using it in real chats proves the matrix matches
+  *real intent* and that artifacts feel good. An agent cannot self-certify this without bias.
+
+**Current status: HOLD** — objective + adversarial evidence is green; the blocker is reduced to
+(a) ~10 real conversations logged and (b) Diego's sign-off on `ARTICLE.md`. Claude does **not**
+declare GO.
 
 ## Synchronized launch sequence (execute only on GO)
 

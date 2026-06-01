@@ -102,7 +102,9 @@ npm install && npm test
 
 It exits non-zero on any failure. To confirm the harness is real, flip one `expect.format` in `evals.json` and watch it fail.
 
-See the rendered output for each format in the gallery: [`examples/index.html`](./examples/index.html). The go/no-go for a public launch lives in [`LAUNCH.md`](./LAUNCH.md).
+See the rendered output for each format in the gallery: [`examples/index.html`](./examples/index.html) (screenshots in [`examples/screenshots/`](./examples/screenshots), regenerate with `npm run shoot`). The matrix is also stress-tested adversarially — 24 edge cases in [`scenarios.json`](./scenarios.json) (`npm run scenarios`), reviewed by independent skeptic agents; findings and fixes in [`ITERATION-LOG.md`](./ITERATION-LOG.md). The go/no-go for a public launch lives in [`LAUNCH.md`](./LAUNCH.md).
+
+![gallery](./examples/screenshots/index.png)
 
 ## Project layout
 
@@ -111,17 +113,21 @@ surface-skill/
 ├── SKILL.md          # Agent Skill instructions (canonical entry for skill consumers)
 ├── policy.yaml       # Decision rules (source of truth)
 ├── evals.json        # Canonical test cases (input → expected format)
-├── examples/         # One rendered artifact per format + index.html gallery
-├── ITERATION-LOG.md  # Closed-validation diary
-├── LAUNCH.md         # Week-3 go/no-go checklist
-├── package.json      # `npm test` runs the evidence harness
+├── scenarios.json    # Broad edge cases for adversarial breadth review
+├── examples/         # One rendered artifact per format + index.html + screenshots/
+├── ITERATION-LOG.md  # Validation log (adversarial + human gates)
+├── LAUNCH.md         # Go/no-go checklist
+├── ARTICLE.md        # Launch article draft
+├── package.json      # `npm test` / `npm run scenarios` / `npm run shoot`
 ├── README.md         # This file
 ├── LICENSE           # MIT
 └── scripts/
     ├── decide.ts     # Pure decision function (~80 lines)
     ├── validate.ts   # Per-format validators
     ├── prompts.ts    # Canonical prompt prefixes
-    └── run-evals.ts  # Evidence harness (routing + artifact validation)
+    ├── run-evals.ts  # Evidence harness (routing + artifact validation)
+    ├── run-scenarios.ts # Exploratory breadth run over scenarios.json
+    └── shoot.ts      # Render the gallery to PNG screenshots
 ```
 
 ## Status

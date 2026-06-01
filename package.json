@@ -6,11 +6,15 @@
   "description": "Output format policy for AI agents — decide HTML/Markdown/JSON/SVG/hybrid from signals.",
   "license": "MIT",
   "scripts": {
-    "test": "tsx scripts/run-evals.ts"
+    "test": "tsx scripts/run-evals.ts",
+    "scenarios": "tsx scripts/run-scenarios.ts",
+    "shoot": "tsx scripts/shoot.ts"
   },
   "devDependencies": {
-    "tsx": "^4",
+    "@playwright/test": "^1.60.0",
+    "@types/js-yaml": "^4",
     "js-yaml": "^4",
-    "@types/js-yaml": "^4"
+    "playwright": "^1.60.0",
+    "tsx": "^4"
   }
 }
