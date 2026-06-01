@@ -1,5 +1,5 @@
 # surface — default output format policy
-# version 0.1.0
+# version 0.2.0
 #
 # Rules are evaluated top to bottom. First match wins.
 # Match syntax:
@@ -7,6 +7,14 @@
 #   list of values: consumer: [human-once, human-archive]
 #   wildcard:       size: "*"
 # Omitted fields default to wildcard.
+#
+# v0.2 changelog (from adversarial breadth review — see ITERATION-LOG.md):
+#   - data-extract now respects a HUMAN consumer (markdown table, not raw JSON).
+#   - rag-ingest with VISUAL content no longer drops diagrams (→ hybrid).
+#   - added `doc` rules (was an unhandled gap → fell to markdown by accident).
+#   - mockups stay html+svg regardless of consumer (was lost to rule ordering).
+#   - machine consumers (agent-next/agent-verify) with structured/tabular/mixed
+#     content no longer fall through to markdown (→ json structured handoff).
 
 version: 1
 
@@ -27,13 +35,12 @@ rules:
       format: html
       reason: "Dashboards are interfaces, not reports."
 
-  - name: "Mockup for humans → HTML+SVG"
+  - name: "Mockup → HTML+SVG"
     match:
       intent: mockup
-      consumer: [human-once, human-archive]
     decide:
       format: html+svg
-      reason: "Layouts are spatial. SVG is the right substrate."
+      reason: "Layouts are spatial. SVG is the right substrate — for human or vision-agent consumers."
 
   - name: "Spec for next agent → hybrid"
     match:
@@ -60,6 +67,23 @@ rules:
     decide:
       format: markdown
       reason: "Specs that fit on a screen scan fine as Markdown."
+
+  - name: "Rich doc for humans → hybrid"
+    match:
+      intent: doc
+      consumer: [human-once, human-archive]
+      content: [visual, mixed]
+    decide:
+      format: hybrid-md-html
+      reason: "Durable, diffable Markdown core + HTML islands for nav/diagrams in runbooks and guides."
+
+  - name: "Doc for humans → Markdown"
+    match:
+      intent: doc
+      consumer: [human-once, human-archive]
+    decide:
+      format: markdown
+      reason: "Reference material stays portable and version-controllable as Markdown."
 
   - name: "Large rich report → HTML"
     match:
@@ -90,12 +114,28 @@ rules:
       format: markdown
       reason: "Short reports don't justify HTML cost."
 
+  - name: "Data extraction for humans → Markdown"
+    match:
+      intent: data-extract
+      consumer: [human-once, human-archive]
+    decide:
+      format: markdown
+      reason: "A human reading/saving extracted data wants a readable table, not raw JSON."
+
   - name: "Data extraction → JSON"
     match:
       intent: data-extract
     decide:
       format: json
-      reason: "Structured data goes in structured containers."
+      reason: "Structured data goes in structured containers for machine consumers."
+
+  - name: "RAG ingest with visuals → hybrid"
+    match:
+      consumer: rag-ingest
+      content: [visual, interactive]
+    decide:
+      format: hybrid-md-html
+      reason: "Don't drop diagrams into a format that can't hold them; keep inline SVG so ingestion isn't lossy."
 
   - name: "RAG ingest → Markdown"
     match:
@@ -127,11 +167,19 @@ rules:
       format: markdown
       reason: "Ephemeral, conversational, low-fidelity. MD is the right tool."
 
+  - name: "Structured handoff to agents → JSON"
+    match:
+      consumer: [agent-next, agent-verify]
+      content: [tabular, structured, mixed]
+    decide:
+      format: json
+      reason: "Machine consumers shouldn't re-parse prose. Structured handoff = JSON payload."
+
   - name: "Default fallback"
     match: "*"
     decide:
       format: markdown
-      reason: "Conservative default: tokens cheap, portability high."
+      reason: "Conservative default: tokens cheap, portability high. (Prose for agents stays MD — 'markdown for agents, HTML for humans'.)"
 
 # Canonical prompt prefixes per format.
 # These are internalized by the agent — not pasted into user-facing output.

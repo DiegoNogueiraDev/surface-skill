@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Code review — streaming logic (surface example)</title>
+  <style>
+    body { font: 15px/1.5 -apple-system, system-ui, sans-serif; margin: 0; color: #1a1a2e; background: #f7f7fb; }
+    header { padding: 20px 28px; background: #11131f; color: #fff; }
+    header h1 { margin: 0 0 4px; font-size: 18px; }
+    header p { margin: 0; opacity: .7; font-size: 13px; }
+    main { max-width: 860px; margin: 0 auto; padding: 24px 20px; }
+    .finding { background: #fff; border-radius: 10px; padding: 16px 18px; margin: 0 0 14px; box-shadow: 0 1px 3px rgba(0,0,0,.08); border-left: 4px solid #ccc; }
+    .finding.high { border-left-color: #e5484d; }
+    .finding.med  { border-left-color: #f5a623; }
+    .finding.low  { border-left-color: #3aa675; }
+    .sev { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; padding: 2px 8px; border-radius: 99px; color: #fff; }
+    .sev.high { background: #e5484d; } .sev.med { background: #f5a623; } .sev.low { background: #3aa675; }
+    .loc { font-family: ui-monospace, Menlo, monospace; font-size: 13px; color: #667; }
+    h3 { margin: 8px 0 6px; font-size: 15px; }
+    pre { background: #0d1117; color: #e6edf3; border-radius: 8px; padding: 12px 14px; overflow-x: auto; font-size: 13px; }
+    .del { color: #ff7b72; } .add { color: #7ee787; }
+    summary { cursor: pointer; font-size: 13px; color: #557; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Code review — streaming response handler</h1>
+    <p>intent=code-review · consumer=human-once · format=<strong>html</strong> · matched rule: "Code review for humans → HTML"</p>
+  </header>
+  <main>
+    <article class="finding high">
+      <span class="sev high">High</span>
+      <span class="loc">stream.ts:42</span>
+      <h3>Unhandled stream error leaks the connection</h3>
+      <p>If <code>reader.read()</code> rejects, the loop exits without releasing the lock or closing the writer — the socket stays open until timeout.</p>
+      <pre><code><span class="del">- for await (const chunk of stream) {</span>
+<span class="del">-   res.write(chunk);</span>
+<span class="del">- }</span>
+<span class="add">+ try {</span>
+<span class="add">+   for await (const chunk of stream) res.write(chunk);</span>
+<span class="add">+ } finally {</span>
+<span class="add">+   reader.releaseLock();</span>
+<span class="add">+   res.end();</span>
+<span class="add">+ }</span></code></pre>
+    </article>
+
+    <article class="finding med">
+      <span class="sev med">Medium</span>
+      <span class="loc">stream.ts:58</span>
+      <h3>Backpressure ignored</h3>
+      <p><code>res.write()</code> return value is dropped. Under a slow client this buffers unboundedly. Await the <code>drain</code> event when it returns <code>false</code>.</p>
+    </article>
+
+    <article class="finding low">
+      <span class="sev low">Low</span>
+      <span class="loc">stream.ts:12</span>
+      <h3>Magic number for chunk size</h3>
+      <details>
+        <summary>Show suggestion</summary>
+        <p>Extract <code>const CHUNK = 16 * 1024</code> to a named constant; it appears in three places.</p>
+      </details>
+    </article>
+  </main>
+</body>
+</html>

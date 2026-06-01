@@ -87,6 +87,25 @@ rules:
       reason: "Internal standard, decided 2026-Q2."
 ```
 
+## Evidence — run the evals
+
+The decision matrix isn't just asserted; it's executed. One command reproduces the proof:
+
+```bash
+npm install && npm test
+```
+
+`npm test` runs two parts:
+
+- **Part A — routing:** runs `decide()` over every case in [`evals.json`](./evals.json) and checks the chosen format (and matched rule) against the expectation. *7/7.*
+- **Part B — artifacts:** runs the validators in `validate.ts` over every file in [`examples/`](./examples) and checks each is well-formed for its format (HTML balanced, JSON parses, SVG scales, MD headings monotonic). *6/6.*
+
+It exits non-zero on any failure. To confirm the harness is real, flip one `expect.format` in `evals.json` and watch it fail.
+
+See the rendered output for each format in the gallery: [`examples/index.html`](./examples/index.html) (screenshots in [`examples/screenshots/`](./examples/screenshots), regenerate with `npm run shoot`). The matrix is also stress-tested adversarially — 24 edge cases in [`scenarios.json`](./scenarios.json) (`npm run scenarios`), reviewed by independent skeptic agents; findings and fixes in [`ITERATION-LOG.md`](./ITERATION-LOG.md). The go/no-go for a public launch lives in [`LAUNCH.md`](./LAUNCH.md).
+
+![gallery](./examples/screenshots/index.png)
+
 ## Project layout
 
 ```
@@ -94,18 +113,26 @@ surface-skill/
 ├── SKILL.md          # Agent Skill instructions (canonical entry for skill consumers)
 ├── policy.yaml       # Decision rules (source of truth)
 ├── evals.json        # Canonical test cases (input → expected format)
-├── ITERATION-LOG.md  # Closed-validation diary
+├── scenarios.json    # Broad edge cases for adversarial breadth review
+├── examples/         # One rendered artifact per format + index.html + screenshots/
+├── ITERATION-LOG.md  # Validation log (adversarial + human gates)
+├── LAUNCH.md         # Go/no-go checklist
+├── ARTICLE.md        # Launch article draft
+├── package.json      # `npm test` / `npm run scenarios` / `npm run shoot`
 ├── README.md         # This file
 ├── LICENSE           # MIT
 └── scripts/
     ├── decide.ts     # Pure decision function (~80 lines)
     ├── validate.ts   # Per-format validators
-    └── prompts.ts    # Canonical prompt prefixes
+    ├── prompts.ts    # Canonical prompt prefixes
+    ├── run-evals.ts  # Evidence harness (routing + artifact validation)
+    ├── run-scenarios.ts # Exploratory breadth run over scenarios.json
+    └── shoot.ts      # Render the gallery to PNG screenshots
 ```
 
 ## Status
 
-**v0.1 — draft, in closed validation.** The Skill and the TypeScript functions work today. The skill is being exercised in real conversations before any public launch — see [`ITERATION-LOG.md`](./ITERATION-LOG.md).
+**v0.1 — draft, in closed validation.** The Skill, the TypeScript functions, and the evidence harness (`npm test`) work today. Routing and artifact checks are green; the skill is being exercised in real conversations before any public launch — see [`ITERATION-LOG.md`](./ITERATION-LOG.md) and [`LAUNCH.md`](./LAUNCH.md).
 
 ### Roadmap (not built yet)
 

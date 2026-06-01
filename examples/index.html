@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>surface — example gallery</title>
+  <style>
+    body { font: 16px/1.6 system-ui, sans-serif; margin: 0; background: #f6f7fb; color: #1a1a2e; }
+    header { padding: 36px 24px 24px; max-width: 820px; margin: 0 auto; }
+    header h1 { margin: 0 0 6px; font-size: 26px; }
+    header p { margin: 0; color: #556; }
+    .grid { max-width: 820px; margin: 0 auto; padding: 8px 24px 48px; display: grid; gap: 16px; }
+    a.card { display: block; text-decoration: none; color: inherit; background: #fff; border-radius: 12px; padding: 18px 20px; box-shadow: 0 1px 4px rgba(0,0,0,.08); border-left: 4px solid #3a5bd9; transition: transform .08s; }
+    a.card:hover { transform: translateY(-2px); }
+    .fmt { font-family: ui-monospace, Menlo, monospace; font-size: 12px; font-weight: 700; color: #fff; background: #3a5bd9; padding: 2px 8px; border-radius: 99px; }
+    .fmt.md { background: #3aa675; } .fmt.json { background: #b5651d; } .fmt.svg { background: #8a3ffc; }
+    h2 { font-size: 17px; margin: 10px 0 4px; }
+    .sig { font-family: ui-monospace, Menlo, monospace; font-size: 12px; color: #667; }
+    .why { margin: 6px 0 0; color: #445; font-size: 14px; }
+    footer { max-width: 820px; margin: 0 auto; padding: 0 24px 48px; color: #889; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>surface — example gallery</h1>
+    <p>One self-contained artifact per format. Each was produced in the format the policy
+       chose for that task. This is the visual evidence: the routing is in <code>policy.yaml</code>,
+       the quality is here.</p>
+  </header>
+  <section class="grid">
+    <a class="card" href="./code-review.html">
+      <span class="fmt">html</span>
+      <h2>Code review — streaming handler</h2>
+      <p class="sig">intent=code-review · consumer=human-once → "Code review for humans → HTML"</p>
+      <p class="why">Diffs need color-coded severity, inline annotations, and collapsibles — Markdown can't.</p>
+    </a>
+    <a class="card" href="./mockup.html">
+      <span class="fmt svg">html+svg</span>
+      <h2>Empty-state mockups — 3 options</h2>
+      <p class="sig">intent=mockup · consumer=human-once → "Mockup for humans → HTML+SVG"</p>
+      <p class="why">Layouts are spatial; inline SVG lets you compare options side by side.</p>
+    </a>
+    <a class="card" href="./dashboard.html">
+      <span class="fmt">html</span>
+      <h2>Service health dashboard</h2>
+      <p class="sig">intent=dashboard · consumer=human-once → "Dashboard for humans → HTML"</p>
+      <p class="why">Dashboards are interfaces for scanning, not reports for reading.</p>
+    </a>
+    <a class="card" href="./spec.md">
+      <span class="fmt">hybrid-md-html</span>
+      <h2>Payments service PRD</h2>
+      <p class="sig">intent=spec · consumer=agent-next → "Spec for next agent → hybrid"</p>
+      <p class="why">Next agent reads MD reliably; HTML islands carry the decision table + data-flow.</p>
+    </a>
+    <a class="card" href="./extraction.json">
+      <span class="fmt json">json</span>
+      <h2>Invoice line-item extraction</h2>
+      <p class="sig">intent=data-extract → "Data extraction → JSON"</p>
+      <p class="why">Structured data goes in a structured container. JSON parses; MD tables don't.</p>
+    </a>
+    <a class="card" href="./rag-summary.md">
+      <span class="fmt md">markdown</span>
+      <h2>Support tickets — RAG digest</h2>
+      <p class="sig">consumer=rag-ingest → "RAG ingest → Markdown"</p>
+      <p class="why">Clean MD chunks best and stays token-efficient at re-embed scale.</p>
+    </a>
+  </section>
+  <footer>
+    Reproduce the routing evidence with <code>npm install &amp;&amp; npm test</code>.
+    See <a href="../LAUNCH.md">LAUNCH.md</a> for the go/no-go checklist.
+  </footer>
+</body>
+</html>

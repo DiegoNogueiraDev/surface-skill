@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Service health dashboard (surface example)</title>
+  <style>
+    body { font: 14px/1.5 system-ui, sans-serif; margin: 0; background: #0e1018; color: #e7eaf2; }
+    header { padding: 18px 24px; border-bottom: 1px solid #232838; }
+    header h1 { margin: 0 0 4px; font-size: 18px; }
+    header p { margin: 0; color: #8b93a7; font-size: 13px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; padding: 22px 24px; }
+    .card { background: #161a26; border: 1px solid #232838; border-radius: 12px; padding: 14px 16px; }
+    .label { color: #8b93a7; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+    .value { font-size: 28px; font-weight: 700; margin: 6px 0 2px; }
+    .delta.up { color: #3fd07f; } .delta.down { color: #ff6b6b; }
+    .ok { color: #3fd07f; } .warn { color: #f5a623; }
+    table { width: calc(100% - 48px); margin: 0 24px 24px; border-collapse: collapse; background: #161a26; border-radius: 12px; overflow: hidden; }
+    th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid #232838; font-size: 13px; }
+    th { color: #8b93a7; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Service health — last 24h</h1>
+    <p>intent=dashboard · consumer=human-once · format=<strong>html</strong> · matched rule: "Dashboard for humans → HTML"</p>
+  </header>
+  <section class="grid">
+    <div class="card"><div class="label">Requests</div><div class="value">2.41M</div><div class="delta up">▲ 8.2%</div></div>
+    <div class="card"><div class="label">p99 latency</div><div class="value">214ms</div><div class="delta down">▲ 31ms</div></div>
+    <div class="card"><div class="label">Error rate</div><div class="value warn">0.42%</div><div class="delta up">▲ 0.1%</div></div>
+    <div class="card"><div class="label">Uptime</div><div class="value ok">99.97%</div><div class="delta">SLO 99.9%</div></div>
+  </section>
+  <table>
+    <thead><tr><th>Endpoint</th><th>Req/s</th><th>p99</th><th>Errors</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>POST /charge</td><td>312</td><td>188ms</td><td>0.3%</td><td class="ok">healthy</td></tr>
+      <tr><td>GET /ledger</td><td>1,204</td><td>96ms</td><td>0.0%</td><td class="ok">healthy</td></tr>
+      <tr><td>POST /webhook</td><td>88</td><td>402ms</td><td>1.1%</td><td class="warn">degraded</td></tr>
+    </tbody>
+  </table>
+</body>
+</html>

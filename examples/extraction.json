@@ -1,0 +1,16 @@
+{
+  "document": "invoice",
+  "invoice_number": "INV-2026-0512",
+  "issue_date": "2026-05-12",
+  "currency": "USD",
+  "vendor": "Northwind Cloud Services",
+  "line_items": [
+    { "description": "Compute — c5.2xlarge (hrs)", "quantity": 744, "unit_price": 0.34, "amount": 252.96 },
+    { "description": "Object storage (GB-month)", "quantity": 2048, "unit_price": 0.021, "amount": 43.01 },
+    { "description": "Egress bandwidth (GB)", "quantity": 612, "unit_price": 0.09, "amount": 55.08 },
+    { "description": "Support plan — Business", "quantity": 1, "unit_price": 100.0, "amount": 100.0 }
+  ],
+  "subtotal": 451.05,
+  "tax": 39.69,
+  "total": 490.74
+}
