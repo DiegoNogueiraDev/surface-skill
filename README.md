@@ -1,64 +1,76 @@
 # surface
 
-**Output format policy for AI agents.**
+**Stop guessing what format your AI agent should reply in.**
 
-`surface` is a deterministic, declarative policy that decides which output format (HTML, Markdown, JSON, SVG, hybrid) an agent should generate, based on five signals: intent, consumer, lifecycle, size, content type.
+When an agent finishes a task, it has to pick a format: Markdown? HTML? JSON? Today that choice is a habit — most prompts just say *"respond in markdown"* and move on. `surface` replaces the habit with a rule you can read, edit, and test.
 
-No ML. No framework. One YAML file you can edit. MIT.
+It looks at **five things about the task** and tells the agent which format to use:
 
-## Why this exists
+| Signal | The question it answers | Example values |
+|--------|-------------------------|----------------|
+| **intent** | What is this output? | code-review, report, spec, dashboard, data-extract |
+| **consumer** | Who reads it next? | a human, the next agent, a RAG index |
+| **lifecycle** | Throwaway or kept? | scratchpad vs. saved artifact |
+| **size** | How big? | small, medium, large |
+| **content** | What's inside? | text, tables, visuals, structured data |
 
-In May 2026, Anthropic's **Thariq Shihipar** ([@trq212](https://x.com/trq212)) argued *The Unreasonable Effectiveness of HTML* for AI agents, and **Andrej Karpathy** ([@karpathy](https://x.com/karpathy)) picked up the thread on x.com (see [Sources](#sources--inspiration)). The thesis: Markdown won the default-output-format race back when context windows were 8k tokens and every character cost money — but with 1M-token contexts and agents reading other agents' outputs, the right format is now a function of *what the output is for*.
+No machine learning. No framework. One YAML file you can open and change. MIT.
 
-That discussion stayed a heuristic. Today every developer still hand-writes "respond in markdown" or "respond in HTML" in prompts, with no shared rationale, no validation, no audit trail.
+---
 
-**`surface` is the policy layer that automates that decision** — it turns the format choice discussed by Thariq and Karpathy into something you can read, version, test, and audit.
+## See it in one example
 
-## What this is *not*
+Same content — a code review — but the format flips based on *who reads it*:
 
-`surface` does not:
+```text
+intent: code-review,  consumer: human       →  HTML   (scannable, collapsible, diff highlighting)
+intent: code-review,  consumer: agent-next  →  JSON   (the next agent parses it, doesn't "read" it)
+```
 
-- Convert between formats. Use [Turndown](https://github.com/mixmark-io/turndown), [markdownify](https://github.com/zcaceres/markdownify-mcp), or [html2md-mcp](https://github.com/sunshad0w/html2md-mcp).
-- Enforce schemas at decode time. Use [Instructor](https://github.com/jxnl/instructor), [LM Format Enforcer](https://github.com/noamgat/lm-format-enforcer), or [Outlines](https://github.com/outlines-dev/outlines).
-- Route between models. Use [LLMRouter](https://github.com/ulab-uiuc/LLMRouter) or similar.
+That's the whole idea: **the right format is a function of what the output is for.** `surface` makes that function explicit.
 
-It decides *what format the output should be in*. Composes with everything above.
+---
 
-## How to use it
+## Quick start
 
-### As an Agent Skill (the working path today)
+### 1. Use it as an Agent Skill (recommended — zero code)
 
-Drop this repo into your agent's skills directory:
+Clone it into your agent's skills folder:
 
 ```bash
-# Claude Code, Cursor, ChatGPT, Codex CLI, Gemini CLI, Junie, Kiro, Goose...
 git clone https://github.com/DiegoNogueiraDev/surface-skill ~/.skills/surface
 ```
 
-The agent reads [`SKILL.md`](./SKILL.md) and applies the policy automatically when it generates substantive artifacts. Zero code on your end.
+Works with Claude Code, Cursor, Codex CLI, Gemini CLI, and other skill-aware agents. The agent reads [`SKILL.md`](./SKILL.md) and applies the policy on its own whenever it produces a real artifact. You write nothing.
 
-### As TypeScript functions (optional)
+### 2. Or call it as TypeScript (optional)
 
-The decision and validation logic live as plain, dependency-free functions in [`scripts/`](./scripts):
+The logic is two small, dependency-free functions in [`scripts/`](./scripts):
 
 ```ts
 import { decide } from "./scripts/decide";
 import { validate } from "./scripts/validate";
-// load policy.yaml with your YAML parser of choice, then:
 
+// 1. Decide the format from your task's signals
 const { format, promptPrefix } = decide(signals, policy);
+
+// 2. After the agent replies, check it actually matches
 const check = validate(response, format);
 if (!check.ok) console.warn(check.errors);
 ```
 
+---
+
 ## The decision matrix
+
+Read it top to bottom — the **first row that matches wins**. The last row is the fallback.
 
 | Intent | Consumer | Size | Content | → Format |
 |--------|----------|------|---------|----------|
 | code-review | human | any | any | **html** |
 | dashboard | human | any | any | **html** |
 | mockup | human | any | any | **html+svg** |
-| spec | agent-next | any | any | **hybrid-md-html** |
+| spec | agent-next | any | any | **hybrid md+html** |
 | spec | human | large | any | **html** |
 | spec | human | small/med | any | **markdown** |
 | report | human | large | tabular/visual | **html** |
@@ -69,13 +81,9 @@ if (!check.ok) console.warn(check.errors);
 | any | agent-verify | any | visual/interactive | **html** |
 | any | agent-verify | any | tabular/structured | **json** |
 | scratchpad | any | any | any | **markdown** |
-| *(fallback)* | | | | **markdown** |
+| *(nothing matched)* | | | | **markdown** |
 
-Source of truth: [`policy.yaml`](./policy.yaml). Edit there.
-
-## Customizing the policy
-
-Copy `policy.yaml`, edit rules, point your code at the new file. Rules match top to bottom; first match wins. Add a wildcard rule at the bottom as fallback.
+The source of truth is [`policy.yaml`](./policy.yaml). To change a rule, edit that file:
 
 ```yaml
 rules:
@@ -87,70 +95,70 @@ rules:
       reason: "Internal standard, decided 2026-Q2."
 ```
 
-## Evidence — run the evals
+---
 
-The decision matrix isn't just asserted; it's executed. One command reproduces the proof:
+## Run the proof yourself
+
+The matrix isn't just claimed — it's executed in tests:
 
 ```bash
 npm install && npm test
 ```
 
-`npm test` runs two parts:
+`npm test` does two things, both green today:
 
-- **Part A — routing:** runs `decide()` over every case in [`evals.json`](./evals.json) and checks the chosen format (and matched rule) against the expectation. *7/7.*
-- **Part B — artifacts:** runs the validators in `validate.ts` over every file in [`examples/`](./examples) and checks each is well-formed for its format (HTML balanced, JSON parses, SVG scales, MD headings monotonic). *6/6.*
+- **Routing (12/12)** — runs `decide()` over every case in [`evals.json`](./evals.json) and checks it picked the expected format (and the expected rule).
+- **Validation (6/6)** — runs `validate()` over the sample outputs in [`examples/`](./examples) and checks each one really conforms to its format (HTML balanced, JSON parses, SVG scales, Markdown headings monotonic).
 
-It exits non-zero on any failure. To confirm the harness is real, flip one `expect.format` in `evals.json` and watch it fail.
+Want to see it fail? Flip one `expect.format` in `evals.json` and re-run.
 
-See the rendered output for each format in the gallery: [`examples/index.html`](./examples/index.html) (screenshots in [`examples/screenshots/`](./examples/screenshots), regenerate with `npm run shoot`). The matrix is also stress-tested adversarially — 24 edge cases in [`scenarios.json`](./scenarios.json) (`npm run scenarios`), reviewed by independent skeptic agents; findings and fixes in [`ITERATION-LOG.md`](./ITERATION-LOG.md). The go/no-go for a public launch lives in [`LAUNCH.md`](./LAUNCH.md).
+See [`examples/`](./examples) for one real output per format — [`code-review.html`](./examples/code-review.html), [`dashboard.html`](./examples/dashboard.html), [`extraction.json`](./examples/extraction.json), [`mockup.html`](./examples/mockup.html), [`spec.md`](./examples/spec.md), [`rag-summary.md`](./examples/rag-summary.md) — plus a side-by-side gallery in [`index.html`](./examples/index.html).
 
 ![gallery](./examples/screenshots/index.png)
 
-## Project layout
+---
 
-```
-surface-skill/
-├── SKILL.md          # Agent Skill instructions (canonical entry for skill consumers)
-├── policy.yaml       # Decision rules (source of truth)
-├── evals.json        # Canonical test cases (input → expected format)
-├── scenarios.json    # Broad edge cases for adversarial breadth review
-├── examples/         # One rendered artifact per format + index.html + screenshots/
-├── ITERATION-LOG.md  # Validation log (adversarial + human gates)
-├── LAUNCH.md         # Go/no-go checklist
-├── ARTICLE.md        # Launch article draft
-├── package.json      # `npm test` / `npm run scenarios` / `npm run shoot`
-├── README.md         # This file
-├── LICENSE           # MIT
-└── scripts/
-    ├── decide.ts     # Pure decision function (~80 lines)
-    ├── validate.ts   # Per-format validators
-    ├── prompts.ts    # Canonical prompt prefixes
-    ├── run-evals.ts  # Evidence harness (routing + artifact validation)
-    ├── run-scenarios.ts # Exploratory breadth run over scenarios.json
-    └── shoot.ts      # Render the gallery to PNG screenshots
-```
+## What surface is *not*
 
-## Status
+`surface` only decides **which format to use**. It composes with the tools that do the rest:
 
-**v0.1 — draft, in closed validation.** The Skill, the TypeScript functions, and the evidence harness (`npm test`) work today. Routing and artifact checks are green; the skill is being exercised in real conversations before any public launch — see [`ITERATION-LOG.md`](./ITERATION-LOG.md) and [`LAUNCH.md`](./LAUNCH.md).
+- **Converting** between formats → [Turndown](https://github.com/mixmark-io/turndown), [markdownify](https://github.com/zcaceres/markdownify-mcp)
+- **Enforcing** a schema at decode time → [Instructor](https://github.com/jxnl/instructor), [Outlines](https://github.com/outlines-dev/outlines)
+- **Routing** between models → [LLMRouter](https://github.com/ulab-uiuc/LLMRouter)
 
-### Roadmap (not built yet)
+---
 
-- **npm package** — `import { decide, validate } from "surface"` without a local clone.
-- **MCP server** — expose `decide` / `validate` as MCP tools for any MCP-compatible agent.
-- **CLI** — `npx surface decide --intent=spec --consumer=agent-next --size=large`.
-- **Telemetry** and publication to `skills.sh`.
+## Why it exists
 
-## Sources & inspiration
+In May 2026, Anthropic's **Thariq Shihipar** ([@trq212](https://x.com/trq212)) argued *The Unreasonable Effectiveness of HTML* for AI agents, and **Andrej Karpathy** ([@karpathy](https://x.com/karpathy)) carried the thread forward on x.com.
 
-The thesis isn't original to this repo — `surface` operationalizes it. Grounding:
+The point: Markdown became the default back when context windows were 8k tokens and every character cost money. But with 1M-token contexts — and agents now reading *other agents'* output — the best format depends on what the output is for, not on an old default.
 
-- **Thariq Shihipar** ([@trq212](https://x.com/trq212)) — *Using Claude Code: The Unreasonable Effectiveness of HTML* (Anthropic, May 8, 2026): [claude.com/blog](https://claude.com/blog/using-claude-code-the-unreasonable-effectiveness-of-html). Companion site with 20 HTML artifacts: [thariqs.github.io/html-effectiveness](https://thariqs.github.io/html-effectiveness/).
-- **Andrej Karpathy** ([@karpathy](https://x.com/karpathy)) — independent endorsement on x.com, framing the progression *text → markdown → HTML → interactive*: [the post](https://x.com/karpathy/status/2053872850101285137).
-- Simon Willison's writeup of the discussion: [simonwillison.net](https://simonwillison.net/2026/May/8/unreasonable-effectiveness-of-html/).
-- The nuance `surface` is built on — *"Markdown for agents, HTML for humans"*: the right format depends on **who reads it next**. That's exactly what the policy encodes.
-- Packaging philosophy: nanoGPT, micrograd, llm.c — one repo, one thesis, read it in 5 minutes.
+That stayed a good idea people repeated. `surface` turns it into a policy you can version, test, and audit.
+
+---
+
+## Sources
+
+- Thariq Shihipar, *The Unreasonable Effectiveness of HTML* (May 2026) — [@trq212](https://x.com/trq212)
+- Andrej Karpathy on output formats for agents — [@karpathy](https://x.com/karpathy)
 
 ## License
 
-MIT — see [`LICENSE`](./LICENSE).
+MIT — see [LICENSE](./LICENSE).
+
+---
+
+```mermaid
+flowchart TD
+    A[Agent has something to output] --> B{intent?}
+    B -->|code-review / dashboard| C[HTML]
+    B -->|mockup| D[HTML + SVG]
+    B -->|data-extract| E[JSON]
+    B -->|spec| F{consumer?}
+    F -->|agent-next| G[hybrid md+html]
+    F -->|human| H{size?}
+    H -->|large| C
+    H -->|small/med| I[Markdown]
+    B -->|report / scratchpad| I
+```
